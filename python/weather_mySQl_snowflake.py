@@ -5,9 +5,6 @@ Version Number ||| Mod By  ||| Version Date
 1.00           |||  GM     ||| May 17 17:39:45 2022
 
 """
-## set which functions to run
-runWeather = True
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -60,7 +57,5 @@ def runweatherPipe():
     toSnow = pd.read_sql_query('select distinct location_name locationName, location_region LocationRegion , location_country LocationCountry , location_lat Latitude , location_lon Longitude , current_last_updated currentLastUpdated , current_temp_c currentTempC , current_condition_text currentCondText, current_wind_mph windMph , current_precip_mm rainMM , current_humidity Humidity , current_cloud Cloud , current_feelslike_c FeelsLikeC  from stg_weather',mySQL_conn);
     ## Drop and recreate table in Snowflake 
     toSnow.to_sql('stg_weather', con=Snowengine, if_exists='replace',index=False, method=pd_writer);
-    
-if runWeather:
-    runweatherPipe()
+
     
