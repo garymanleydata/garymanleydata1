@@ -13,5 +13,5 @@ from stravaPipeline import stravaPipe
 ### need to add log / configuration table 
 
 
-#runweatherPipe()
+runweatherPipe()
 stravaPipe()

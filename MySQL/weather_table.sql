@@ -86,9 +86,35 @@ CurrentAirQualityPm10	VARCHAR(100),
 CurrentAQUsepaindex	VARCHAR(100),
 CurrentAQGbdefraindex	VARCHAR(100));
 
-select * from weather;
+select * from stg_weather sw ;
 
 select location_name, location_region  , location_country  , location_lat  , location_lon  , current_last_updated  , current_temp_c  , current_condition_text , current_wind_mph , current_precip_mm  , current_humidity  , current_cloud , current_feelslike_c  from stg_weather
 ;
 select location_name locationName, location_region LocationRegion , location_country LocationCountry , location_lat latitude , location_lon longitude , current_last_updated currentLastUpdated , current_temp_c currentTempC , current_condition_text currentCondText, current_wind_mph windMph , current_precip_mm rainMM , current_humidity humidity , current_cloud cloud , current_feelslike_c feelsLikeC  from stg_weather
 ;
+
+create or replace view stg_strava_v as
+select 	name,
+		distance,
+		moving_time,
+		elapsed_time,
+		total_elevation_gain,
+		`type`,
+		id,
+		start_date_local,
+		average_speed,
+		max_speed,
+		average_cadence,
+		average_heartrate,
+		max_heartrate,
+		elev_high,
+		elev_low,
+		upload_id,
+		upload_id_str
+	from pre_stg_strava ps where not exists (select null from stg_strava ss where ss.id = ps.id ); 
+	
+
+## Create an ETL group table, have insert into this upon completion of steps in the ETL package
+## This can be used to get last run date and hold config 
+## And put exception handling in the python code 
+## have functions to be called by python - ETL to run. Pass back true / false 
