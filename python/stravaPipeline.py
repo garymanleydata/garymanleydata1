@@ -77,4 +77,4 @@ def stravaPipe():
     stravaSnow.to_sql('stg_strava', con=Snowengine, if_exists='replace',index=False, method=pd_writer);
     print('Snowflake Load Completed')
     
-
+stravaPipe()

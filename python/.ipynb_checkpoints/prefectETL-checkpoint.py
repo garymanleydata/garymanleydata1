@@ -14,7 +14,6 @@ from flatten_json import flatten
 from sqlalchemy import create_engine
 from snowflake.connector.pandas_tools import pd_writer
 import os 
-from datetime import timedelta
 
 # Load Keys
 #weather
@@ -43,31 +42,31 @@ Snowengine = create_engine(
                 db= SnowDB,
                 schema=SnowSchema ))
 
-@task(max_retries=3, retry_delay=timedelta(seconds=10))
+@task
 def extract_api_data():
     jsonurl = urllib.request.urlopen("http://api.weatherapi.com/v1/current.json?key="+weatherkey+"&q=BN266NH&aqi=yes")
     weatherdatajson = json.loads(jsonurl.read())
     return weatherdatajson
 
-@task(max_retries=3, retry_delay=timedelta(seconds=10))
+@task
 def transform(weatherdatajson):
     flattendata = flatten(weatherdatajson)
     normWeatherData = pd.json_normalize(flattendata)
     return normWeatherData
 
-@task(max_retries=3, retry_delay=timedelta(seconds=10))
+@task
 def load_mySQL_data(normWeatherData):
     normWeatherData.to_sql('stg_weather', con=mySQL_conn, if_exists='append',index=False)
     loaded_ind = 'Y'
     return loaded_ind 
 
-@task(max_retries=3, retry_delay=timedelta(seconds=10))  
+@task    
 def extract_mySQL_data(loaded_ind):
     if loaded_ind == 'Y' :  
         toSnow = pd.read_sql_query('select distinct location_name locationName, location_region LocationRegion , location_country LocationCountry , location_lat Latitude , location_lon Longitude , current_last_updated currentLastUpdated , current_temp_c currentTempC , current_condition_text currentCondText, current_wind_mph windMph , current_precip_mm rainMM , current_humidity Humidity , current_cloud Cloud , current_feelslike_c FeelsLikeC  from stg_weather',mySQL_conn)
     return toSnow
 
-@task(max_retries=3, retry_delay=timedelta(seconds=10))
+@task
 def load_live_data(toSnow):
     toSnow.to_sql('stg_weather', con=Snowengine, if_exists='replace',index=False, method=pd_writer)
     
@@ -78,4 +77,3 @@ with Flow("Weather-ETL") as flow:
     frommySQL = extract_mySQL_data(loadedmySQL)  
     end = load_live_data(frommySQL)
 
-flow.run()
