@@ -2,3 +2,4 @@
 python/variables.env
 python/.env
 python/test.csv
+Streamlit/.streamlit/secrets.toml
