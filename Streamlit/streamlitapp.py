@@ -1,10 +1,6 @@
 
 import streamlit as st 
 import pandas as pd
-from sqlalchemy import create_engine
-from snowflake.connector.pandas_tools import pd_writer
-
-# setup database connection strings
 import snowflake.connector
 
 st.set_page_config(
