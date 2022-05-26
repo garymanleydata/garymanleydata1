@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu May 26 15:55:57 2022
+
+@author: garym
+"""
+
 
 import streamlit as st 
 import pandas as pd
@@ -53,13 +60,3 @@ df[['ACTIVITY_TYPE', 'ACTIVITY_DATE', 'DATE_DAY','DAY_NAME','LAG_DATE_1','YEAR_M
 dfTable  = ps.sqldf('SELECT ACTIVITY_DATE ,  sum(DISTANCE_KM) distance_km, sum(moving_time_minutes) move_minutes FROM df WHERE ACTIVITY_TYPE IN (\'Run\',\'Walk\') GROUP BY  ACTIVITY_DATE order by ACTIVITY_DATE')
 dfTable = dfTable.rename(columns={'ACTIVITY_DATE':'index'}).set_index('index')
 dfTable
-
-st.write('This is a line_chart.')
-st.line_chart(dfTable)
-
-st.write('This is a bar chart with plotly.')
-
-#query = ('SELECT ACTIVITY_DATE , "TYPE",  sum(DISTANCE_KM) distance_km, sum(moving_time_minutes) move_minutes FROM STRAVA_ACTIVITIES_STAR_FACT WHERE "TYPE" IN (\'Run\',\'Walk\') GROUP BY  ACTIVITY_DATE , "TYPE" order by ACTIVITY_DATE')
-dfStacked  = ps.sqldf('SELECT ACTIVITY_DATE , ACTIVITY_TYPE,  sum(DISTANCE_KM) distance_km, sum(moving_time_minutes) move_minutes FROM df WHERE ACTIVITY_TYPE IN (\'Run\',\'Walk\') GROUP BY  ACTIVITY_DATE , ACTIVITY_TYPE order by ACTIVITY_DATE')
-fig = px.bar(dfStacked, x='ACTIVITY_DATE', y='distance_km', color = "ACTIVITY_TYPE")
-st.plotly_chart(fig, use_container_width=True, sharing="streamlit")
