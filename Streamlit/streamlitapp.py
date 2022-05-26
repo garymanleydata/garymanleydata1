@@ -5,6 +5,8 @@ import snowflake.connector
 import plotly.express as px
 import datetime
 import pandasql as ps
+from st_aggrid import AgGrid
+from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
     page_title="Strava Data Dashboard",
@@ -16,14 +18,15 @@ st.set_page_config(
 st.title("Gary Manley Strava Data Dashboard")
 st.markdown('Streamlit is **_really_ cool**.')
 
-today = datetime.date.today()
-prev_date = today + datetime.timedelta(days=-30)
-start_date = st.date_input('Start date', prev_date)
-end_date = st.date_input('End date', today)
-if start_date < end_date:
-    st.success('Start date: `%s`\n\nEnd date:`%s`' % (start_date, end_date))
-else:
-    st.error('Error: End date must fall after start date.')
+with st.sidebar:
+    today = datetime.date.today()
+    prev_date = today + datetime.timedelta(days=-30)
+    start_date = st.date_input('Start date', prev_date)
+    end_date = st.date_input('End date', today)
+    if start_date < end_date:
+        st.success('Start date: `%s`\n\nEnd date:`%s`' % (start_date, end_date))
+    else:
+        st.error('Error: End date must fall after start date.')
 
 def init_connection():
     return snowflake.connector.connect(**st.secrets["snowflake"])
@@ -52,7 +55,14 @@ df = df[df.ACTIVITY_DATE.between(start_date, end_date)]
 df[['ACTIVITY_TYPE', 'ACTIVITY_DATE', 'DATE_DAY','DAY_NAME','LAG_DATE_1','YEAR_MONTH' ]] = df[['ACTIVITY_TYPE', 'ACTIVITY_DATE', 'DATE_DAY','DAY_NAME','LAG_DATE_1','YEAR_MONTH']].astype(str)
 dfTable  = ps.sqldf('SELECT ACTIVITY_DATE ,  sum(DISTANCE_KM) distance_km, sum(moving_time_minutes) move_minutes FROM df WHERE ACTIVITY_TYPE IN (\'Run\',\'Walk\') GROUP BY  ACTIVITY_DATE order by ACTIVITY_DATE')
 dfTable = dfTable.rename(columns={'ACTIVITY_DATE':'index'}).set_index('index')
-dfTable
+
+# add this
+gb = GridOptionsBuilder.from_dataframe(df)
+gb.configure_pagination()
+gridOptions = gb.build()
+
+AgGrid(df, gridOptions=gridOptions)
+
 
 st.write('This is a line_chart.')
 st.line_chart(dfTable)
