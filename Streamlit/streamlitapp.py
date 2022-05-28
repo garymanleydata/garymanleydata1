@@ -7,6 +7,7 @@ import datetime
 import pandasql as ps
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
+import mysql.connector
 
 # setup initial page config
 st.set_page_config(
@@ -16,8 +17,11 @@ st.set_page_config(
 )
 
 # setup snowflake config
-def init_connection():
-    return snowflake.connector.connect(**st.secrets["snowflake"])
+def init_connection(db):
+    if db == 'snowflake':
+        return snowflake.connector.connect(**st.secrets["snowflake"])
+    if db == 'mySQL': 
+        return mysql.connector.connect(**st.secrets["mysql"])    
 
 #function for creating csv and caching to save on resource 
 @st.cache
@@ -26,7 +30,8 @@ def convert_df(df):
      return df.to_csv().encode('utf-8')
 
 # initiate Snowflake connection 
-conn = init_connection()
+Snowconn = init_connection('snowflake')
+mySQLconn = init_connection('mySQL')
 
 # Create selection box in the sidebar, allows users to pick one, default of strava data
 option = st.sidebar.selectbox("Which Dashboard?", ('Strava Data', 'Strength Data', 'parkrun results'), 0)
@@ -53,7 +58,7 @@ if option == 'Strava Data':
     
     # Run the base query 
     query = ('SELECT UPLOAD_ID, "TYPE" as ACTIVITY_TYPE ,ACTIVITY_DATE,DISTANCE_METRES,DISTANCE_KM,DISTANCE_MILES,MOVING_TIME_SECONDS,MOVING_TIME_MINUTES,TOTAL_ELEVATION_GAIN,AVERAGE_SPEED,AVERAGE_CADENCE,AVERAGE_HEARTRATE,MAX_SPEED,MAX_HEARTRATE,DATE_DAY,DATE_YEAR,DATE_MONTH,DATE_QUARTER,DAY_OF_WEEK,DAY_OF_YEAR,WEEK_OF_DAY,DAY_NAME,LAG_DATE_1,YEAR_MONTH FROM STRAVA_ACTIVITIES_STAR_FACT')
-    cur = conn.cursor().execute(query)
+    cur = Snowconn.cursor().execute(query)
     df = pd.DataFrame.from_records(iter(cur), columns=[x[0] for x in cur.description])
     # filter data to the dates selected
     df = df[df.ACTIVITY_DATE.between(start_date, end_date)]
@@ -66,7 +71,6 @@ if option == 'Strava Data':
     
     # setup columns and add a metric to each. 
     col1, col2, col3 = st.columns(3)
-    TotalDistance = dfMetric.iat[0,0]
     col1.metric('Total Distance Logged', dfMetric.iat[0,0])
     col2.metric("Total Minutes Logged", dfMetric.iat[0,1])
     col3.metric("Total Elevation Gain", dfMetric.iat[0,2])
@@ -96,3 +100,27 @@ if option == 'Strava Data':
         dfStacked  = ps.sqldf('SELECT ACTIVITY_DATE , ACTIVITY_TYPE,  sum(DISTANCE_KM) distance_km, sum(moving_time_minutes) move_minutes FROM df WHERE ACTIVITY_TYPE IN (\'Run\',\'Walk\') GROUP BY  ACTIVITY_DATE , ACTIVITY_TYPE order by ACTIVITY_DATE')
         fig = px.bar(dfStacked, x='ACTIVITY_DATE', y='distance_km', color = "ACTIVITY_TYPE")
         st.plotly_chart(fig, use_container_width=True, sharing="streamlit")
+        
+if option == 'parkrun results':
+    # Run the base query 
+        parkrunQuery = ('SELECT "parkrun_place", "event_date", "age_category" , "parkrun_number", "parkrun_position", "event_time"  from "parkrun_results_fact"')
+        cur = Snowconn.cursor().execute(parkrunQuery)
+   
+        parkrundf = pd.DataFrame.from_records(iter(cur), columns=[x[0] for x in cur.description])
+
+        dfTiles  = ps.sqldf('SELECT  max("parkrun_number") total_parkruns,  min("event_time") fastest_time, min("parkrun_position") best_position from parkrundf')
+        col1, col2, col3 = st.columns(3)
+        col1.metric('Total parkruns', dfTiles.iat[0,0])
+        col2.metric("Fastest Time", dfTiles.iat[0,1])
+        col3.metric("Best Finishing Position", dfTiles.iat[0,2])
+              
+        gb = GridOptionsBuilder.from_dataframe(parkrundf)
+        gb.configure_pagination()
+        gridOptions = gb.build()
+
+        AgGrid(parkrundf, gridOptions=gridOptions)
+
+        # Add download button for the data frame
+        csv = convert_df(parkrundf)
+        st.download_button(label="Download data as CSV", data=csv, file_name='parkrun_results.csv', mime='text/csv')        
+
