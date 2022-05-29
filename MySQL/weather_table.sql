@@ -118,3 +118,7 @@ select 	name,
 ## This can be used to get last run date and hold config 
 ## And put exception handling in the python code 
 ## have functions to be called by python - ETL to run. Pass back true / false 
+
+select parkrun_place , event_date, age_category , parkrun_number , event_time , parkrun_position , age_rating from v_parkrun_processed vpp ;
+
+SELECT parkrun_place , event_date, age_category , parkrun_number , event_time , parkrun_position  from v_parkrun_processed
