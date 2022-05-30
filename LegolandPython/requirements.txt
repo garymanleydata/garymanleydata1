@@ -5,5 +5,10 @@ plotly.express
 datetime
 pandasql
 streamlit-aggrid
+mysql-server
+mysql-client
+libmysqlclient15-dev
+python-mysqldb
 mysql-connector-python
 sqlalchemy
+
