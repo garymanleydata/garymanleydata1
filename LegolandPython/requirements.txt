@@ -7,5 +7,4 @@ pandasql
 streamlit-aggrid
 mysql-connector-python
 sqlalchemy
-mysqlclient
 python-mysqldb
