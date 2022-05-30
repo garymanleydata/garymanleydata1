@@ -1,0 +1,10 @@
+streamlit
+pandas
+snowflake-connector-python
+plotly.express
+datetime
+pandasql
+streamlit-aggrid
+mysql-connector-python
+sqlalchemy
+mysqlclient
