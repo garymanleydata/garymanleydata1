@@ -6,3 +6,4 @@ datetime
 pandasql
 streamlit-aggrid
 mysql-connector-python
+sqlalchemy
