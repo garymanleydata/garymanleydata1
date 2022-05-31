@@ -132,7 +132,28 @@ if option == 'Latest Data':
     gridOptions = gb.build()
 
     AgGrid(livedf, gridOptions=gridOptions)
+
     ## make a live data map  
+    url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
+    resp = requests.get(url)
+    data  = j.loads(resp.text)    
+    
+    LegoMapLive = px.choropleth_mapbox(livedf, 
+                           geojson=data, 
+                           locations='ride_name', 
+                           color='ride_wait_time',
+                           color_continuous_scale="Viridis",
+                           range_color=(0, 70),
+                           mapbox_style="carto-positron", 
+                           zoom=14, 
+                           center = {"lat": 51.4630509  , "lon":  -0.6472471},
+                           opacity=0.5 , 
+                           featureidkey="properties.name",
+                           labels={'Current Wait':'ride_wait_time'}
+                                                                         
+                          )
+    st.plotly_chart(LegoMapLive, use_container_width=True, sharing="streamlit")
+
  
     
     # Compare averages and current queue times to work out best rides to go on now
