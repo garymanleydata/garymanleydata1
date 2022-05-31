@@ -67,6 +67,22 @@ if option == 'Queue Data':
     fig = px.line(rideWaits, x="hour_logged", y="average_wait", color='ride_name')
     st.write('Average Ride Waits by hour')
     st.plotly_chart(fig, use_container_width=True, sharing="streamlit")
+    
+    figmulti = px.line(
+        rideWaits, 
+        x='hour_logged', 
+        y='average_wait', 
+        facet_col='ride_name', 
+        facet_col_wrap=3, 
+        color='ride_name', 
+        width=1000,
+        height=2000,
+        facet_row_spacing=0.04, # default is 0.07 when facet_col_wrap is used
+        facet_col_spacing=0.04
+        )   
+    figmulti.update_layout(showlegend=False)
+    st.plotly_chart(figmulti, use_container_width=True, sharing="streamlit")
+    
 
     heatmap = go.Figure(data = go.Heatmap(x = rideWaits['hour_logged'] , y = rideWaits['ride_name'], z = rideWaits['average_wait'] ))
     heatmap.update_layout(
