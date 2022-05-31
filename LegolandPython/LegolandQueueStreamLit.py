@@ -123,7 +123,7 @@ if option == 'Latest Data':
     liveMap = ('SELECT * FROM location_lat_lon')
     mapdf = pd.read_sql_query(liveMap,mySQLconn);
 
-  
+ ## make a live data map and a live data by land with columns  
     
 ## work out best order to go on selected rides. 
 ## anyway to integrate  map? and plot route for a day
