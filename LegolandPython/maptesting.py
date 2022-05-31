@@ -9,6 +9,10 @@ import pandas as pd
 import json as j
 import streamlit as st
 import mysql.connector
+import plotly.express as px
+#import urllib
+import requests
+
 
 def init_connection(db):
     if db == 'mySQL': 
@@ -17,16 +21,19 @@ def init_connection(db):
 mySQLconn = init_connection('mySQL')
 ridequery = ('SELECT * FROM legoland_overall_waits_v')
 rideWaits = pd.read_sql_query(ridequery,mySQLconn);
-# Opening JSON file
-f = open(r'C:\Users\garym\Documents\GitHub\garymanleydata\LegolandPython\Legoland.json')
-  
-# returns JSON object as 
-# a dictionary
-data = j.load(f)
 
-#df = pd.read_json(r'C:\Users\garym\Documents\GitHub\garymanleydata\LegolandPython\Legoland.json')
+## use this for testing if needed
+#f = open(r'C:\Users\garym\Documents\GitHub\garymanleydata\LegolandPython\Legoland.json')
+#data = j.load(f)
 
-import plotly.express as px
+### next steo is can I plot it in streanlit 
+## make a live version and can I work out distances between 2 rides using it? 
+
+## this is live file 
+url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
+resp = requests.get(url)
+
+data  = j.loads(resp.text)
 
 fig = px.choropleth_mapbox(rideWaits, 
                            geojson=data, 

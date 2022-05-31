@@ -10,11 +10,14 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import datetime
+#import datetime
 import pandasql as ps
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 import mysql.connector
+import requests
+import json as j
+
 
 # setup initial page config
 st.set_page_config(
@@ -78,6 +81,27 @@ if option == 'Queue Data':
     gridOptions = gb.build()
 
     AgGrid(bestworstdf, gridOptions=gridOptions)
+    
+    
+    url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
+    resp = requests.get(url)
+    data  = j.loads(resp.text)    
+    
+    LegoMap = px.choropleth_mapbox(rideWaits, 
+                           geojson=data, 
+                           locations='ride_name', 
+                           color='average_wait',
+                           color_continuous_scale="Viridis",
+                           range_color=(0, 120),
+                           mapbox_style="carto-positron", 
+                           zoom=16, 
+                           center = {"lat": 51.4630509  , "lon":  -0.6472471},
+                           opacity=0.5 , 
+                           featureidkey="properties.name",
+                           labels={'Average Wait':'average_wait'}
+                                                                         
+                          )
+    st.plotly_chart(LegoMap, use_container_width=True, sharing="streamlit")
 
 if option == 'Latest Data':
     st.title("Legoland Live Queue Data Dashboard")

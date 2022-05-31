@@ -8,3 +8,4 @@ streamlit-aggrid
 mysql-connector-python
 sqlalchemy
 plotly
+requests
