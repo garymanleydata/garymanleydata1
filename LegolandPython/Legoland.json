@@ -116,6 +116,47 @@
 		"properties": {
 			"name": "LEGO® City Deep Sea Adventure"
 		}
+	},
+	,
+	{
+		"type": "Feature",
+		"geometry": {
+			"type": "Polygon",
+			  "coordinates": 
+			   [
+    [
+      [
+        -0.6480995,
+        51.4645631
+      ],
+      [
+        -0.6480968,
+        51.464558
+      ],
+      [
+        -0.6482497,
+        51.4647938
+      ],
+      [
+        -0.6484938,
+        51.4647436
+      ],
+      [
+        -0.6483462,
+        51.4645096
+      ],
+      [
+        -0.6480995,
+        51.4645631
+      ]
+    ]
+  ]
+		},
+		"properties": {
+			"name": "Haunted House Monster Party"
+		}
 	}
+	
+	
 	]
 }
