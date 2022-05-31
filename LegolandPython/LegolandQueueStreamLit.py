@@ -81,18 +81,21 @@ if option == 'Queue Data':
     gridOptions = gb.build()
 
     AgGrid(bestworstdf, gridOptions=gridOptions)
+
+    allridequery = ('SELECT * FROM legoland_overall_waits_v order by ride_name')
+    allrideWaits = pd.read_sql_query(allridequery,mySQLconn);
     
     
     url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
     resp = requests.get(url)
     data  = j.loads(resp.text)    
     
-    LegoMap = px.choropleth_mapbox(rideWaits, 
+    LegoMap = px.choropleth_mapbox(allrideWaits, 
                            geojson=data, 
                            locations='ride_name', 
                            color='average_wait',
                            color_continuous_scale="Viridis",
-                           range_color=(0, 120),
+                           range_color=(0, 70),
                            mapbox_style="carto-positron", 
                            zoom=14, 
                            center = {"lat": 51.4630509  , "lon":  -0.6472471},
@@ -127,3 +130,4 @@ if option == 'Latest Data':
     
 ## work out best order to go on selected rides. 
 ## anyway to integrate  map? and plot route for a day
+## want to be able to filter by peak / off peak / weather
