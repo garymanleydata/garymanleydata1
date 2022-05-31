@@ -2,6 +2,13 @@
 """
 Created on Sun May 29 11:49:19 2022
 
+Long term to do: 
+    ## want to be able to filter by peak / off peak / weather (need to add Legoland weather)
+    ## Will need to add rides to map that not on my queue list 
+            Viking River Splash 
+
+
+
 @author: garym
 """
 
@@ -108,6 +115,9 @@ if option == 'Queue Data':
 
 if option == 'Latest Data':
     st.title("Legoland Live Queue Data Dashboard")
+    ## add a header here with last uodated time 
+    
+    ## add queue times per land per popular rides in columns 
     liveQ = ('SELECT * FROM live_wait_times_v')
     livedf = pd.read_sql_query(liveQ,mySQLconn);
 
@@ -122,12 +132,9 @@ if option == 'Latest Data':
     gridOptions = gb.build()
 
     AgGrid(livedf, gridOptions=gridOptions)
-
-    liveMap = ('SELECT * FROM location_lat_lon')
-    mapdf = pd.read_sql_query(liveMap,mySQLconn);
-
- ## make a live data map and a live data by land with columns  
+    ## make a live data map  
+ 
     
-## work out best order to go on selected rides. 
-## anyway to integrate  map? and plot route for a day
-## want to be able to filter by peak / off peak / weather
+    # Compare averages and current queue times to work out best rides to go on now
+    
+## on live dashboard have it show above / below average and rating as to which best rides to go on compared to average 
