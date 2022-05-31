@@ -4,3 +4,4 @@ python/.env
 python/test.csv
 Streamlit/.streamlit/secrets.toml
 python/planetscale/.env
+LegolandPython/.streamlit/secrets.toml
