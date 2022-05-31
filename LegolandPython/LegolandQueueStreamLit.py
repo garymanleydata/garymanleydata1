@@ -65,6 +65,7 @@ if option == 'Queue Data':
     col2.metric("Average Wait Time", dfMetric.iat[0,1])
 
     fig = px.line(rideWaits, x="hour_logged", y="average_wait", color='ride_name')
+    st.write('Average Ride Waits by hour')
     st.plotly_chart(fig, use_container_width=True, sharing="streamlit")
 
     heatmap = go.Figure(data = go.Heatmap(x = rideWaits['hour_logged'] , y = rideWaits['ride_name'], z = rideWaits['average_wait'] ))
@@ -73,8 +74,8 @@ if option == 'Queue Data':
         showlegend=True,
         width=1000, height=1000,
         autosize=False)
-  
-    #heatmap = px.imshow(rideWaits.drop('lands_name', 1))
+
+    st.write('Heat Maps of Rides by Hour')  
     st.plotly_chart(heatmap, use_container_width=True, sharing="streamlit")
 
     ## add table showing the best times to go on each ride
@@ -86,7 +87,7 @@ if option == 'Queue Data':
     gb = GridOptionsBuilder.from_dataframe(bestworstdf)
     gb.configure_pagination()
     gridOptions = gb.build()
-
+    st.write('Rides - Best and Worst times')  
     AgGrid(bestworstdf, gridOptions=gridOptions)
 
     allridequery = ('SELECT * FROM legoland_overall_waits_v order by ride_name')
@@ -111,6 +112,7 @@ if option == 'Queue Data':
                            labels={'Average Wait':'average_wait'}
                                                                          
                           )
+    st.markdown('Map with **Average Times**.')
     st.plotly_chart(LegoMap, use_container_width=True, sharing="streamlit")
 
 if option == 'Latest Data':
@@ -152,10 +154,10 @@ if option == 'Latest Data':
                            labels={'Current Wait':'ride_wait_time'}
                                                                          
                           )
+    st.markdown('Map with **Live Times**.')
     st.plotly_chart(LegoMapLive, use_container_width=True, sharing="streamlit")
 
- 
     
     # Compare averages and current queue times to work out best rides to go on now
     
-## on live dashboard have it show above / below average and rating as to which best rides to go on compared to average 
+    # on live dashboard have it show above / below average and rating as to which best rides to go on compared to average 
