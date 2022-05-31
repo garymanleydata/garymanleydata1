@@ -36,7 +36,8 @@
 		"properties": {
 			"name": "Flight of the Sky Lion"
 		}
-	}, {
+	},
+	{
 		"type": "Feature",
 		"geometry": {
 			"type": "Polygon",
@@ -76,5 +77,45 @@
 		"properties": {
 			"name": "Hydra's Challenge"
 		}
-	}]
+	}
+	,
+	{
+		"type": "Feature",
+		"geometry": {
+			"type": "Polygon",
+			  "coordinates": 
+			 [
+    [
+      [
+        -0.6475223,
+        51.4652552
+      ],
+      [
+        -0.6475115,
+        51.4652519
+      ],
+      [
+        -0.6474901,
+        51.4655662
+      ],
+      [
+        -0.6480587,
+        51.4655729
+      ],
+      [
+        -0.6480668,
+        51.4652485
+      ],
+      [
+        -0.6475223,
+        51.4652552
+      ]
+    ]
+  ]  
+		},
+		"properties": {
+			"name": "LEGO® City Deep Sea Adventure"
+		}
+	}
+	]
 }

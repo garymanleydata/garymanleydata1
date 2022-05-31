@@ -94,7 +94,7 @@ if option == 'Queue Data':
                            color_continuous_scale="Viridis",
                            range_color=(0, 120),
                            mapbox_style="carto-positron", 
-                           zoom=16, 
+                           zoom=14, 
                            center = {"lat": 51.4630509  , "lon":  -0.6472471},
                            opacity=0.5 , 
                            featureidkey="properties.name",
