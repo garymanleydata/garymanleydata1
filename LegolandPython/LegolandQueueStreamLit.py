@@ -37,7 +37,7 @@ option = st.sidebar.selectbox("Which Dashboard?", ('Queue Data', 'Latest Data', 
 if option == 'Queue Data':
     st.title("Legoland Queue Data Dashboard")
     
-    ridequery = ('SELECT * FROM legoland_avg_ride_wait_v')
+    ridequery = ('SELECT * FROM legoland_avg_ride_wait_v order by hour_logged')
     rideWaits = pd.read_sql_query(ridequery,mySQLconn);
     
     with st.sidebar:
