@@ -6,3 +6,4 @@ Streamlit/.streamlit/secrets.toml
 python/planetscale/.env
 LegolandPython/.streamlit/secrets.toml
 LegolandPython/temp-plot.html
+python/planetscale/out.csv

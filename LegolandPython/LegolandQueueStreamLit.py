@@ -4,10 +4,11 @@ Created on Sun May 29 11:49:19 2022
 
 Long term to do: 
     ## want to be able to filter by peak / off peak / weather (need to add Legoland weather)
-    ## Will need to add rides to map that not on my queue list 
-            Viking River Splash 
+    ## Add Last Updated to the live Dashboard 
+    ## Add photos
+    ## Add the closed rides dashboard
 
-
+#https://discuss.streamlit.io/t/fav-icon-title-customization/10662/4
 
 @author: garym
 """
@@ -150,6 +151,26 @@ if option == 'Latest Data':
     gridOptions = gb.build()
 
     AgGrid(livedf, gridOptions=gridOptions)
+
+    dayridequery = ('SELECT * FROM legoland_avg_ride_wait_today_v order by hour_logged')
+    dayrideWaits = pd.read_sql_query(dayridequery,mySQLconn);
+
+    st.markdown('Queue Times-- **Today Only**.')
+    figmultiday = px.line(
+        dayrideWaits, 
+        x='hour_logged', 
+        y='average_wait', 
+        facet_col='ride_name', 
+        facet_col_wrap=3, 
+        color='ride_name', 
+        width=1000,
+        height=2000,
+        facet_row_spacing=0.04, # default is 0.07 when facet_col_wrap is used
+        facet_col_spacing=0.04
+        )   
+    figmultiday.update_layout(showlegend=False)
+    st.plotly_chart(figmultiday, use_container_width=True, sharing="streamlit")
+
 
     ## make a live data map  
     url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
