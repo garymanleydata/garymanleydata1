@@ -40,7 +40,7 @@ def init_connection(db):
 
 mySQLconn = init_connection('mySQL')
 
-option = st.sidebar.selectbox("Which Dashboard?", ('Queue Data', 'Latest Data', 'Closure Rates'), 0)
+option = st.sidebar.selectbox("Which Dashboard?", ('Queue Data', 'Latest Data', 'Ride Closures'), 0)
 
 if option == 'Queue Data':
     st.title("Legoland Queue Data Dashboard")
@@ -194,7 +194,22 @@ if option == 'Latest Data':
     st.markdown('Map with **Live Times**.')
     st.plotly_chart(LegoMapLive, use_container_width=True, sharing="streamlit")
 
-    
+if option == 'Ride Closures':
+    st.title("Legoland Ride Closure Dashboard")    
+    dfExpectedClosures = pd.read_html('https://www.legoland.co.uk/plan-your-day/useful-guides/ride-availability/')[0]
+    dfExpectedClosures.set_axis(['Ride Name', 'Closure Comment'], axis=1, inplace=True)
+    gb = GridOptionsBuilder.from_dataframe(dfExpectedClosures)
+    gb.configure_pagination()
+    gridOptions = gb.build()
+    st.write('Planned Closures Today')  
+    AgGrid(dfExpectedClosures, gridOptions=gridOptions)
+
+
+
+## best rides to go on now page 
+
+
     # Compare averages and current queue times to work out best rides to go on now
     
     # on live dashboard have it show above / below average and rating as to which best rides to go on compared to average 
+    
