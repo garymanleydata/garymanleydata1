@@ -24,6 +24,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 import mysql.connector
 import requests
+import datetime
 import json as j
 
 
@@ -195,6 +196,16 @@ if option == 'Latest Data':
     st.plotly_chart(LegoMapLive, use_container_width=True, sharing="streamlit")
 
 if option == 'Ride Closures':
+    st.write('Pick a date or range:')
+    today = datetime.date.today()
+    prev_date = today + datetime.timedelta(days=-30)
+    start_date = st.date_input('Start date', prev_date)
+    end_date = st.date_input('End date', today)
+    if start_date < end_date:
+            st.success('Start date: `%s`\n\nEnd date:`%s`' % (start_date, end_date))
+    else:
+            st.error('Error: End date must fall after start date.')
+
     st.title("Legoland Ride Closure Dashboard")    
     dfExpectedClosures = pd.read_html('https://www.legoland.co.uk/plan-your-day/useful-guides/ride-availability/')[0]
     dfExpectedClosures.set_axis(['Ride Name', 'Closure Comment'], axis=1, inplace=True)
@@ -203,7 +214,21 @@ if option == 'Ride Closures':
     gridOptions = gb.build()
     st.write('Planned Closures Today')  
     AgGrid(dfExpectedClosures, gridOptions=gridOptions)
+    
+    ## next steps 
+    ## legoland_closures_v and apply dates filter  
+    ## roll up to the closed pings by day by ride having > 2 as bar chart
+    ## see if on click of a ride can present table with breakdown of closures 
 
+    query = ('SELECT land_name, ride_name, run_date, log_time_utc FROM legoland_closures_v')
+    cur = mySQLconn.cursor().execute(query)
+    df = pd.DataFrame.from_records(iter(cur), columns=[x[0] for x in cur.description])
+    # filter data to the dates selected
+    df = df[df.run_date.between(start_date, end_date)]
+
+    dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 2 order by run_date, land_name, ride_name')
+    figbar = px.bar(dfTotals, x='run_date', y='closure_pings', color = "ride_name")
+    st.plotly_chart(fig, use_container_width=True, sharing="streamlit")
 
 
 ## best rides to go on now page 
