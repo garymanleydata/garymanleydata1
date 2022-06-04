@@ -228,7 +228,7 @@ if option == 'Ride Closures':
     df = df[df.run_date.between(start_date, end_date)]
 
     dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 3 order by run_date, land_name, ride_name')
-    figbar = px.bar(dfTotals, x='run_date', y='closure_pings', color = "ride_name")
+    figbar = px.bar(dfTotals, x='run_date', y='closure_pings', color = "ride_name",  barmode='group')
     #st.plotly_chart(figbar, use_container_width=True, sharing="streamlit")
     selected_points = plotly_events(figbar)
     selectedData = pd.DataFrame(selected_points)
