@@ -26,6 +26,7 @@ import mysql.connector
 import requests
 import datetime
 import json as j
+from streamlit_plotly_events import plotly_events
 
 
 # setup initial page config
@@ -199,7 +200,7 @@ if option == 'Ride Closures':
     with st.sidebar:
         st.write('Pick a date or range:')
         today = datetime.date.today()
-        prev_date = today + datetime.timedelta(days=-30)
+        prev_date = today + datetime.timedelta(days=-7)
         start_date = st.date_input('Start date', prev_date)
         end_date = st.date_input('End date', today)
         if start_date < end_date:
@@ -226,10 +227,10 @@ if option == 'Ride Closures':
     # filter data to the dates selected
     df = df[df.run_date.between(start_date, end_date)]
 
-    dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 2 order by run_date, land_name, ride_name')
+    dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 3 order by run_date, land_name, ride_name')
     figbar = px.bar(dfTotals, x='run_date', y='closure_pings', color = "ride_name")
     st.plotly_chart(figbar, use_container_width=True, sharing="streamlit")
-
+    selected_points = plotly_events(figbar)
 
 ## best rides to go on now page 
 

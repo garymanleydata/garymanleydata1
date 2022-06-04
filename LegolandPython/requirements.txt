@@ -10,3 +10,4 @@ sqlalchemy
 plotly
 requests
 lxml
+streamlit-plotly-events
