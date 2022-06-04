@@ -29,7 +29,7 @@ import json as j
 
 # setup initial page config
 st.set_page_config(
-    page_title="Gary Manley Legoland Dashboard",
+    page_title="Legoland Dashboard",
     page_icon="✅",
     layout="wide",
 )
@@ -45,7 +45,7 @@ option = st.sidebar.selectbox("Which Dashboard?", ('Queue Data', 'Latest Data', 
 if option == 'Queue Data':
     st.title("Legoland Queue Data Dashboard")
     
-    ridequery = ('SELECT * FROM legoland_avg_ride_wait_v order by hour_logged')
+    ridequery = ('SELECT * FROM legoland_avg_ride_wait_v where hour_logged < 19 order by hour_logged')
     rideWaits = pd.read_sql_query(ridequery,mySQLconn);
     
     with st.sidebar:

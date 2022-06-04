@@ -1,92 +1,3 @@
-create table testing
-as 
-select 1 
-union all 
-select 2 
-union all 
-select 3;
-
-select * from testing;
-
-select * from ride_data ; 
--- create a run dim, join to that instead of having log tim and date? 
-SHOW VARIABLES LIKE "%version%";
-
-
-select 	lands_0_id as land_id, 
-		lands_0_name as lands_name, 
-		lands_0_rides_0_Id as ride_id, 
-		lands_0_rides_0_name as ride_name,
-		lands_0_rides_0_is_open as is_open,
-		lands_0_rides_0_last_updated as log_time, 
-		lands_0_rides_0_wait_time as ride_wait_time		
-from ride_data 
-union 
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_0_Id as ride_idq, 
-		lands_1_rides_0_name as ride_name,
-		lands_1_rides_0_is_open as is_open,
-		lands_1_rides_0_last_updated as log_time,  
-		lands_1_rides_0_wait_time as ride_wait_time		
-from ride_data 
-union  
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_1_Id as ride_idq, 
-		lands_1_rides_1_name as ride_name,
-		lands_1_rides_1_is_open as is_open,
-		lands_1_rides_1_last_updated as log_time,
-		lands_1_rides_1_wait_time as ride_wait_time		
-from ride_data 
-;
-union all 
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_2_Id as ride_idq, 
-		lands_1_rides_2_name as ride_name,
-		lands_1_rides_2_is_open as is_open,
-		lands_1_rides_2_last_updated as log_time, 
-		lands_1_rides_2_wait_time as ride_wait_time		
-from ride_data
-union all 
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_3_Id as ride_idq, 
-		lands_1_rides_3_name as ride_name,
-		lands_1_rides_3_is_open as is_open,
-		lands_1_rides_3_last_updated as log_time, 
-		lands_1_rides_3_wait_time as ride_wait_time		
-from ride_data
-union all 
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_4_Id as ride_idq, 
-		lands_1_rides_4_name as ride_name,
-		lands_1_rides_4_is_open as is_open,
-		lands_1_rides_4_last_updated as log_time, 
-		lands_1_rides_4_wait_time as ride_wait_time		
-from ride_data
-union all 
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_5_Id as ride_idq, 
-		lands_1_rides_5_name as ride_name,
-		lands_1_rides_5_is_open as is_open,
-		lands_1_rides_5_last_updated as log_time, 
-		lands_1_rides_5_wait_time as ride_wait_time		
-from ride_data
-union all 
-select 	lands_1_id as land_id, 
-		lands_1_name as lands_name, 
-		lands_1_rides_6_Id as ride_idq, 
-		lands_1_rides_6_name as ride_name,
-		lands_1_rides_6_is_open as is_open,
-		lands_1_rides_6_last_updated as log_time, 
-		lands_1_rides_6_wait_time as ride_wait_time		
-from ride_data 
-;
-
 -- write a view to transform this 
 -- would be good to get this running on a schedule on python anywhere 
 -- look at cost and then want to get this and the weather data running
@@ -152,6 +63,17 @@ where is_open = 1
 group by  land_name, ride_name,  hour(CAST(log_time AS DATETIME))+1;
 
 select * from legoland_avg_ride_wait_v;
+select * from wait_time_fact_v;
+
+create table aml_wait_time_fact
+as select * from wait_time_fact_v;
+truncate table aml_wait_time_fact;
+
+insert into  aml_wait_time_fact
+select * from wait_time_fact_v;
+
+select * from aml_wait_time_fact
+
 
 
 create table land_ride_dim as 
@@ -298,4 +220,4 @@ and ride_name not in ('Castaway Camp','Cole’s Rock Climb','Creature Creation','D
 						'Miniland','Pirate Goldwash','Remote Control Boats','The Brick','The Magical Forest','DUPLO® Valley Theatre'
 						,'LEGO® Friends: Girls on a Mission','','','')
 group by land_name, ride_name,  hour(CAST(log_time AS DATETIME))+1 
- order by hour_logged, land_name , ride_name
+ order by hour_logged, land_name , ride_name;
