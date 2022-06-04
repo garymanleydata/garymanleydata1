@@ -221,8 +221,7 @@ if option == 'Ride Closures':
     ## see if on click of a ride can present table with breakdown of closures 
 
     query = ('SELECT land_name, ride_name, run_date, log_time_utc FROM legoland_closures_v')
-    cur = mySQLconn.cursor().execute(query)
-    df = pd.DataFrame.from_records(iter(cur), columns=[x[0] for x in cur.description])
+    df  = pd.read_sql_query(query,mySQLconn);
     # filter data to the dates selected
     df = df[df.run_date.between(start_date, end_date)]
 
