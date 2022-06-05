@@ -222,18 +222,30 @@ if option == 'Ride Closures':
     ## roll up to the closed pings by day by ride having > 2 as bar chart
     ## see if on click of a ride can present table with breakdown of closures 
 
-    query = ('SELECT land_name, ride_name, run_date, log_time_utc FROM legoland_closures_v')
+    query = ('SELECT land_name, ride_name, run_date, log_time FROM legoland_closures_v')
     df  = pd.read_sql_query(query,mySQLconn);
     # filter data to the dates selected
     df = df[df.run_date.between(start_date, end_date)]
 
+    
     dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 3 order by run_date, land_name, ride_name')
     figbar = px.bar(dfTotals, x='run_date', y='closure_pings', color = "ride_name",  barmode='group')
-    #st.plotly_chart(figbar, use_container_width=True, sharing="streamlit")
     selected_points = plotly_events(figbar)
-    selectedData = pd.DataFrame(selected_points)
-    selected_points
-    
+    if selected_points:
+        selectedData = pd.DataFrame(selected_points)
+        extract = selected_points[[0][0]]
+        index_of_selected = extract['curveNumber']
+        dfSelect = dfTotals.filter(items = [index_of_selected], axis=0)
+ 
+        dfSelect
+        #dfSelected = df.merge(dfSelect, on=['ride_name'], how='inner')
+        dfSelected= ps.sqldf('SELECT df.land_name, df.ride_name, df.run_date, df.log_time FROM df INNER JOIN dfSelect on df.ride_name = dfSelect.ride_name and df.run_date = dfSelect.run_date  ')
+        dfSelected
+    else:    
+ 
+       st.write('Select a point in graph to display the data')          
+ 
+
 ## best rides to go on now page 
 
 
