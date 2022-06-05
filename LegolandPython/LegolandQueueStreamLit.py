@@ -3,12 +3,9 @@
 Created on Sun May 29 11:49:19 2022
 
 Long term to do: 
-    ## want to be able to filter by peak / off peak / weather (need to add Legoland weather)
+    ## want to be able to filter by weather (need to add Legoland weather to weather extract script)
     ## Add Last Updated to the live Dashboard 
-    ## Add photos
-    ## Add the closed rides dashboard
-
-#https://discuss.streamlit.io/t/fav-icon-title-customization/10662/4
+    ## Add photos - can I use plotly events and PIL?
 
 @author: garym
 """
@@ -51,6 +48,7 @@ if option == 'Queue Data':
     rideWaits = pd.read_sql_query(ridequery,mySQLconn);
     
     with st.sidebar:
+        peakOption = st.sidebar.selectbox("What times would you like to see?", ('All Data', 'Peak Data', 'Off-Peak Data'), 0)
         displayoption = st.multiselect("Pick Land to Display",rideWaits.land_name.unique(),rideWaits.land_name.unique())
         rides = rideWaits.loc[rideWaits['land_name'].isin(displayoption)]
         displayoptionrides = st.multiselect("Pick Rides to Display",rides.ride_name.unique(),rides.ride_name.unique())
@@ -64,17 +62,28 @@ if option == 'Queue Data':
 
    # setup columns and add a metric to each. 
     col1, col2 = st.columns(2)
-    col1.metric('Max Wait Time', dfMetric.iat[0,0])
-    col2.metric("Average Wait Time", dfMetric.iat[0,1])
+    col1.metric('Max Wait Time (All)', dfMetric.iat[0,0])
+    col2.metric("Average Wait Time (All)", dfMetric.iat[0,1])
 
-    fig = px.line(rideWaits, x="hour_logged", y="average_wait", color='ride_name')
+
+    if peakOption == 'All Data':
+        fig = px.line(rideWaits, x="hour_logged", y="average_wait", color='ride_name')
+        measure_name = "average_wait"
+    elif peakOption == 'Peak Data':
+        fig = px.line(rideWaits, x="hour_logged", y="average_wait_peak", color='ride_name')
+        measure_name = "average_wait_peak"
+    elif peakOption == 'Off-Peak Data':
+        fig = px.line(rideWaits, x="hour_logged", y="average_wait_off_peak", color='ride_name')
+        measure_name = "average_wait_off_peak"
+
     st.write('Average Ride Waits by hour')
     st.plotly_chart(fig, use_container_width=True, sharing="streamlit")
     
     figmulti = px.line(
         rideWaits, 
         x='hour_logged', 
-        y='average_wait', 
+ #       y='average_wait', 
+        y=measure_name, 
         facet_col='ride_name', 
         facet_col_wrap=3, 
         color='ride_name', 
@@ -87,7 +96,7 @@ if option == 'Queue Data':
     st.plotly_chart(figmulti, use_container_width=True, sharing="streamlit")
     
 
-    heatmap = go.Figure(data = go.Heatmap(x = rideWaits['hour_logged'] , y = rideWaits['ride_name'], z = rideWaits['average_wait'] ))
+    heatmap = go.Figure(data = go.Heatmap(x = rideWaits['hour_logged'] , y = rideWaits['ride_name'], z = rideWaits[measure_name] ))
     heatmap.update_layout(
         margin=dict(t=200, r=200, b=200, l=200),
         showlegend=True,
@@ -120,7 +129,7 @@ if option == 'Queue Data':
     LegoMap = px.choropleth_mapbox(allrideWaits, 
                            geojson=data, 
                            locations='ride_name', 
-                           color='average_wait',
+                           color=measure_name,
                            color_continuous_scale="Viridis",
                            range_color=(0, 70),
                            mapbox_style="carto-positron", 
@@ -216,11 +225,7 @@ if option == 'Ride Closures':
     gridOptions = gb.build()
     st.write('Planned Closures Today')  
     AgGrid(dfExpectedClosures, gridOptions=gridOptions)
-    
-    ## next steps 
-    ## legoland_closures_v and apply dates filter  
-    ## roll up to the closed pings by day by ride having > 2 as bar chart
-    ## see if on click of a ride can present table with breakdown of closures 
+
 
     query = ('SELECT land_name, ride_name, run_date, log_time FROM legoland_closures_v')
     df  = pd.read_sql_query(query,mySQLconn);
@@ -228,24 +233,35 @@ if option == 'Ride Closures':
     df = df[df.run_date.between(start_date, end_date)]
 
     
-    dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 3 order by run_date, land_name, ride_name')
+    dfTotals = ps.sqldf('SELECT  land_name, ride_name, run_date, count(*) closure_pings FROM df group by land_name, ride_name, run_date having count(*) > 3 order by run_date, ride_name')
+    dfList = ps.sqldf('SELECT  ride_name, min(run_date) min_date FROM dfTotals group by ride_name order by min_date, ride_name')
     figbar = px.bar(dfTotals, x='run_date', y='closure_pings', color = "ride_name",  barmode='group')
     selected_points = plotly_events(figbar)
     if selected_points:
-        selectedData = pd.DataFrame(selected_points)
+        selectedData = pd.DataFrame(selected_points)     
         extract = selected_points[[0][0]]
         index_of_selected = extract['curveNumber']
-        dfSelect = dfTotals.filter(items = [index_of_selected], axis=0)
- 
-        dfSelect
-        #dfSelected = df.merge(dfSelect, on=['ride_name'], how='inner')
-        dfSelected= ps.sqldf('SELECT df.land_name, df.ride_name, df.run_date, df.log_time FROM df INNER JOIN dfSelect on df.ride_name = dfSelect.ride_name and df.run_date = dfSelect.run_date  ')
-        dfSelected
+        date_of_selected = extract['x']
+        dfSelect = dfList.filter(items = [index_of_selected], axis=0)
+             
+        dfSelected= ps.sqldf("SELECT df.land_name, df.ride_name, df.run_date, df.log_time FROM df INNER JOIN dfSelect on df.ride_name = dfSelect.ride_name and df.run_date = '"+ date_of_selected + "'")
+        
+        gb = GridOptionsBuilder.from_dataframe(dfSelected)
+        gb.configure_pagination()
+        gridOptions = gb.build()
+        AgGrid(dfSelected, gridOptions=gridOptions)
+        
+        ## Output for testing only
+        #selectedData
+        #extract
+        #index_of_selected
+        #date_of_selected
+        #dfList
+        
     else:    
  
        st.write('Select a point in graph to display the data')          
  
-
 ## best rides to go on now page 
 
 
