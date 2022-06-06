@@ -67,13 +67,16 @@ if option == 'Queue Data':
 
 
     if peakOption == 'All Data':
-        fig = px.line(rideWaits, x="hour_logged", y="average_wait", color='ride_name')
+        fig = px.line(rideWaits, x="hour_logged", y="average_wait", color='ride_name',
+        color_discrete_sequence=px.colors.qualitative.Alphabet)
         measure_name = "average_wait"
     elif peakOption == 'Peak Data':
-        fig = px.line(rideWaits, x="hour_logged", y="average_wait_peak", color='ride_name')
+        fig = px.line(rideWaits, x="hour_logged", y="average_wait_peak", color='ride_name',
+        color_discrete_sequence=px.colors.qualitative.Alphabet)
         measure_name = "average_wait_peak"
     elif peakOption == 'Off-Peak Data':
-        fig = px.line(rideWaits, x="hour_logged", y="average_wait_off_peak", color='ride_name')
+        fig = px.line(rideWaits, x="hour_logged", y="average_wait_off_peak", color='ride_name',
+        color_discrete_sequence=px.colors.qualitative.Alphabet)
         measure_name = "average_wait_off_peak"
 
     st.write('Average Ride Waits by hour')
@@ -90,21 +93,33 @@ if option == 'Queue Data':
         width=1000,
         height=2000,
         facet_row_spacing=0.04, # default is 0.07 when facet_col_wrap is used
-        facet_col_spacing=0.04
+        facet_col_spacing=0.04,
+        color_discrete_sequence=px.colors.qualitative.Alphabet
         )   
     figmulti.update_layout(showlegend=False)
     st.plotly_chart(figmulti, use_container_width=True, sharing="streamlit")
     
 
-    heatmap = go.Figure(data = go.Heatmap(x = rideWaits['hour_logged'] , y = rideWaits['ride_name'], z = rideWaits[measure_name] ))
-    heatmap.update_layout(
+    trace = go.Heatmap(x = rideWaits['hour_logged'] , y = rideWaits['ride_name'], z = rideWaits[measure_name] , 
+        colorscale='Geyser', 
+        hovertemplate='Hour Logged: %{x}<br>Ride Name: %{y}<br>Ride Wait: %{z}<extra></extra>')
+    data = [trace]
+    layout = go.Layout(xaxis=go.layout.XAxis(
+        title=go.layout.xaxis.Title(
+            text='Hour Logged',
+            )),
+        yaxis=go.layout.YAxis(
+        title=go.layout.yaxis.Title(
+        text='Ride Name',)),        
         margin=dict(t=200, r=200, b=200, l=200),
         showlegend=True,
         width=1000, height=1000,
         autosize=False)
-
+    
+    f6 = go.Figure(data, layout=layout)
     st.write('Heat Maps of Rides by Hour')  
-    st.plotly_chart(heatmap, use_container_width=True, sharing="streamlit")
+    st.plotly_chart(f6, use_container_width=True, sharing="streamlit")
+    
 
     ## add table showing the best times to go on each ride
     bestworstquery = ('SELECT * FROM ride_best_worst_times_v')
@@ -130,7 +145,7 @@ if option == 'Queue Data':
                            geojson=data, 
                            locations='ride_name', 
                            color=measure_name,
-                           color_continuous_scale="Viridis",
+                           color_continuous_scale="Geyser",
                            range_color=(0, 70),
                            mapbox_style="carto-positron", 
                            zoom=14, 
@@ -166,33 +181,36 @@ if option == 'Latest Data':
     dayridequery = ('SELECT * FROM legoland_avg_ride_wait_today_v order by hour_logged')
     dayrideWaits = pd.read_sql_query(dayridequery,mySQLconn);
 
-    st.markdown('Queue Times-- **Today Only**.')
-    figmultiday = px.line(
-        dayrideWaits, 
-        x='hour_logged', 
-        y='average_wait', 
-        facet_col='ride_name', 
-        facet_col_wrap=3, 
-        color='ride_name', 
-        width=1000,
-        height=2000,
-        facet_row_spacing=0.04, # default is 0.07 when facet_col_wrap is used
-        facet_col_spacing=0.04
-        )   
-    figmultiday.update_layout(showlegend=False)
-    st.plotly_chart(figmultiday, use_container_width=True, sharing="streamlit")
+    if dayrideWaits.empty:
+        st.markdown('No Data available for Today')
+    else:
+        st.markdown('Queue Times-- **Today Only**.')
+        figmultiday = px.line(
+            dayrideWaits, 
+            x='hour_logged', 
+            y='average_wait', 
+            facet_col='ride_name', 
+            facet_col_wrap=3, 
+            color='ride_name', 
+            width=1000,
+            height=2000,
+            facet_row_spacing=0.04, # default is 0.07 when facet_col_wrap is used
+            facet_col_spacing=0.04
+            )   
+        figmultiday.update_layout(showlegend=False)
+        st.plotly_chart(figmultiday, use_container_width=True, sharing="streamlit")
 
 
-    ## make a live data map  
-    url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
-    resp = requests.get(url)
-    data  = j.loads(resp.text)    
+        ## make a live data map  
+        url = 'https://raw.githubusercontent.com/garymanleydata/garymanleydata1/main/LegolandPython/Legoland.json'
+        resp = requests.get(url)
+        data  = j.loads(resp.text)    
     
-    LegoMapLive = px.choropleth_mapbox(livedf, 
+        LegoMapLive = px.choropleth_mapbox(livedf, 
                            geojson=data, 
                            locations='ride_name', 
                            color='ride_wait_time',
-                           color_continuous_scale="Viridis",
+                           color_continuous_scale="Geyser",
                            range_color=(0, 70),
                            mapbox_style="carto-positron", 
                            zoom=14, 
@@ -202,8 +220,8 @@ if option == 'Latest Data':
                            labels={'Current Wait':'ride_wait_time'}
                                                                          
                           )
-    st.markdown('Map with **Live Times**.')
-    st.plotly_chart(LegoMapLive, use_container_width=True, sharing="streamlit")
+        st.markdown('Map with **Live Times**.')
+        st.plotly_chart(LegoMapLive, use_container_width=True, sharing="streamlit")
 
 if option == 'Ride Closures':
     with st.sidebar:
